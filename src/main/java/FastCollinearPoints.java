@@ -21,37 +21,36 @@ public class FastCollinearPoints {
         if (initPoints == null) throw new NullPointerException();
         points = Arrays.copyOf(initPoints, initPoints.length);
         Arrays.sort(points);
-        //now array points sorted by point's position
-
-        Point[] sortedBySlope;
         for (int i = 0; i < points.length; i++) {
             Point first = points[i];
             if (first == null)
                 throw new NullPointerException();
-            sortedBySlope = Arrays.copyOfRange(points, i + 1, points.length);
-            Arrays.sort(sortedBySlope, first.slopeOrder());
-            Map<Double, Integer> slopeStats = new HashMap<>();
-            ArrayList<Double> slopes = new ArrayList<>();
-            for (Point aSortedBySlope : sortedBySlope) slopes.add(first.slopeTo(aSortedBySlope));
-            for (int l = 0; l < sortedBySlope.length; l++) {
-                if (first.compareTo(sortedBySlope[l]) == 0)
+            Point[] tailPoints = Arrays.copyOfRange(points, i + 1, points.length);
+            Map<Double, ArrayList<Integer>> slopeStats = new HashMap<>();
+            for (int k = 0; k < tailPoints.length; k++) {
+                if (first.compareTo(tailPoints[k]) == 0)
                     throw new IllegalArgumentException();
-                if (slopeStats.get(slopes.get(l)) != null)
-                    slopeStats.put(slopes.get(l),
-                            slopeStats.get(slopes.get(l)) + 1);
-                else slopeStats.put(slopes.get(l), 1);
+                double currentSlope = first.slopeTo(tailPoints[k]);
+                if (slopeStats.get(currentSlope) != null){
+                    ArrayList<Integer> foundIndexes = slopeStats.get(currentSlope);
+                    foundIndexes.add(k);
+                    slopeStats.put(currentSlope, new ArrayList<Integer>(foundIndexes));
+                }
+                else slopeStats.put(currentSlope, new ArrayList<Integer>(Arrays.asList(k)));
             }
-            Map<Double, Integer> slopesOfCollinear =
+            Map<Double, ArrayList<Integer>> slopesOfCollinear =
                     slopeStats.entrySet()
                             .stream()
-                            .filter(p -> p.getValue() >= 3)
+                            .filter(p -> p.getValue().size() >= 3)
                             .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
             for (Double slope : slopesOfCollinear.keySet()) {
                 ArrayList<Point> segment = new ArrayList<>();
-                segment.add(first);
-                segment.addAll(Arrays.asList(sortedBySlope)
-                        .subList(slopes.indexOf(slope), slopes.lastIndexOf(slope) + 1));
-                //Collections.sort(segment); not required as long as subarray is already sorted in natural order
+                segment.add(0, first);
+                segment.addAll(slopesOfCollinear
+                        .get(slope)
+                        .stream()
+                        .map(index -> tailPoints[index])
+                        .collect(Collectors.toList()));
                 if (!checkIsIncluded(segments, segment))
                     segments.add(segment);
             }
@@ -84,21 +83,6 @@ public class FastCollinearPoints {
         }
         return isAlreadyAdded;
     }
-
-    /*private static boolean checkIsIncluded(ArrayList<ArrayList<Point>> segmentList, ArrayList<Point> newSegment) {
-        boolean included = false;
-        if (segmentList.size() > 0) {
-            for (ArrayList<Point> segment : segmentList) {
-                if (segment.get(segment.size() - 1) == newSegment.get(newSegment.size() - 1)
-                        && segment.get(segment.size() - 1).slopeTo(segment.get(0))
-                        == newSegment.get(newSegment.size() - 1).slopeTo(newSegment.get(0))) {
-                    included = true;
-                    break;
-                }
-            }
-        }
-        return included;
-    }*/
 
     /**
      * Returns the number of line segments
