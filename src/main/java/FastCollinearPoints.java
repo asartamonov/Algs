@@ -28,15 +28,14 @@ public class FastCollinearPoints {
             Point[] tailPoints = Arrays.copyOfRange(points, i + 1, points.length);
             Map<Double, ArrayList<Integer>> slopeStats = new HashMap<>();
             for (int k = 0; k < tailPoints.length; k++) {
-                if (first.compareTo(tailPoints[k]) == 0)
-                    throw new IllegalArgumentException();
                 double currentSlope = first.slopeTo(tailPoints[k]);
-                if (slopeStats.get(currentSlope) != null){
+                if (currentSlope == Double.NEGATIVE_INFINITY)
+                    throw new IllegalArgumentException();
+                if (slopeStats.get(currentSlope) != null) {
                     ArrayList<Integer> foundIndexes = slopeStats.get(currentSlope);
                     foundIndexes.add(k);
-                    slopeStats.put(currentSlope, new ArrayList<Integer>(foundIndexes));
-                }
-                else slopeStats.put(currentSlope, new ArrayList<Integer>(Arrays.asList(k)));
+                    slopeStats.put(currentSlope, foundIndexes);
+                } else slopeStats.put(currentSlope, new ArrayList<Integer>(Arrays.asList(k)));
             }
             Map<Double, ArrayList<Integer>> slopesOfCollinear =
                     slopeStats.entrySet()
@@ -46,12 +45,11 @@ public class FastCollinearPoints {
             for (Double slope : slopesOfCollinear.keySet()) {
                 ArrayList<Point> segment = new ArrayList<>();
                 segment.add(0, first);
-                segment.addAll(slopesOfCollinear
-                        .get(slope)
+                segment.addAll(slopesOfCollinear.get(slope)
                         .stream()
                         .map(index -> tailPoints[index])
                         .collect(Collectors.toList()));
-                if (!checkIsIncluded(segments, segment))
+                if (!checkIsIncluded(segments, segment, slope))
                     segments.add(segment);
             }
         }
@@ -65,17 +63,16 @@ public class FastCollinearPoints {
      * as long as our array is sorted, no longer segment are possible
      * through the search, only shorter parts of already included segments;
      */
-
-
-    private static boolean checkIsIncluded(ArrayList<ArrayList<Point>> segmentList, ArrayList<Point> newSegment) {
+    private static boolean checkIsIncluded(ArrayList<ArrayList<Point>> segmentList,
+                                           ArrayList<Point> newSegment,
+                                           double newSegmentSlope) {
         boolean isAlreadyAdded = false;
         if (segmentList.size() > 0) {
             ListIterator<ArrayList<Point>> segmentsIterator = segmentList.listIterator(segmentList.size());
             while (segmentsIterator.hasPrevious()) {
                 ArrayList<Point> segment = segmentsIterator.previous();
                 if (segment.get(segment.size() - 1) == newSegment.get(newSegment.size() - 1)
-                        && segment.get(segment.size() - 1).slopeTo(segment.get(0))
-                        == newSegment.get(newSegment.size() - 1).slopeTo(newSegment.get(0))) {
+                        && segment.get(segment.size() - 1).slopeTo(segment.get(0)) == newSegmentSlope) {
                     isAlreadyAdded = true;
                     break;
                 }
@@ -87,7 +84,6 @@ public class FastCollinearPoints {
     /**
      * Returns the number of line segments
      */
-
     public int numberOfSegments() {
         return toReturn.length;
     }
