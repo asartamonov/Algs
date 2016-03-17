@@ -21,7 +21,7 @@ public class FastCollinearPoints {
         if (initPoints == null) throw new NullPointerException();
         points = Arrays.copyOf(initPoints, initPoints.length);
         Arrays.sort(points);
-        //now array points sorted by point's position
+        //array points sorted by point's position
 
         Point[] sortedBySlope;
         for (int i = 0; i < points.length; i++) {
@@ -51,7 +51,6 @@ public class FastCollinearPoints {
                 segment.add(first);
                 segment.addAll(Arrays.asList(sortedBySlope)
                         .subList(slopes.indexOf(slope), slopes.lastIndexOf(slope) + 1));
-                //Collections.sort(segment); not required as long as subarray is already sorted in natural order
                 if (!checkIsIncluded(segments, segment))
                     segments.add(segment);
             }
