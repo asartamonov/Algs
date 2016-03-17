@@ -42,13 +42,11 @@ public class FastCollinearPoints {
                             .stream()
                             .filter(p -> p.getValue().size() >= 3)
                             .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+            ArrayList<Point> segment;
             for (Double slope : slopesOfCollinear.keySet()) {
-                ArrayList<Point> segment = new ArrayList<>();
+                segment = new ArrayList<>();
                 segment.add(0, first);
-                segment.addAll(slopesOfCollinear.get(slope)
-                        .stream()
-                        .map(index -> tailPoints[index])
-                        .collect(Collectors.toList()));
+                segment.add(tailPoints[slopesOfCollinear.get(slope).get(slopesOfCollinear.get(slope).size() - 1)]);
                 if (!checkIsIncluded(segments, segment, slope))
                     segments.add(segment);
             }
@@ -71,8 +69,8 @@ public class FastCollinearPoints {
             ListIterator<ArrayList<Point>> segmentsIterator = segmentList.listIterator(segmentList.size());
             while (segmentsIterator.hasPrevious()) {
                 ArrayList<Point> segment = segmentsIterator.previous();
-                if (segment.get(segment.size() - 1) == newSegment.get(newSegment.size() - 1)
-                        && segment.get(segment.size() - 1).slopeTo(segment.get(0)) == newSegmentSlope) {
+                if (segment.get(1) == newSegment.get(1)
+                        && segment.get(1).slopeTo(segment.get(0)) == newSegmentSlope) {
                     isAlreadyAdded = true;
                     break;
                 }
