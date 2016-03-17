@@ -21,14 +21,14 @@ public class FastCollinearPoints {
         if (initPoints == null) throw new NullPointerException();
         points = Arrays.copyOf(initPoints, initPoints.length);
         Arrays.sort(points);
+        Point first;
         for (int i = 0; i < points.length; i++) {
-            Point first = points[i];
+            first = points[i];
             if (first == null)
                 throw new NullPointerException();
-            Point[] tailPoints = Arrays.copyOfRange(points, i + 1, points.length);
             Map<Double, ArrayList<Integer>> slopeStats = new HashMap<>();
-            for (int k = 0; k < tailPoints.length; k++) {
-                double currentSlope = first.slopeTo(tailPoints[k]);
+            for (int k = i+1; k < points.length; k++) {
+                double currentSlope = first.slopeTo(points[k]);
                 if (currentSlope == Double.NEGATIVE_INFINITY)
                     throw new IllegalArgumentException();
                 if (slopeStats.get(currentSlope) != null) {
@@ -46,7 +46,7 @@ public class FastCollinearPoints {
             for (Double slope : slopesOfCollinear.keySet()) {
                 segment = new ArrayList<>();
                 segment.add(0, first);
-                segment.add(tailPoints[slopesOfCollinear.get(slope).get(slopesOfCollinear.get(slope).size() - 1)]);
+                segment.add(points[slopesOfCollinear.get(slope).get(slopesOfCollinear.get(slope).size() - 1)]);
                 if (!checkIsIncluded(segments, segment, slope))
                     segments.add(segment);
             }
