@@ -20,16 +20,14 @@ public class FastCollinearPoints {
     public FastCollinearPoints(Point[] initPoints) {
         if (initPoints == null) throw new NullPointerException();
         points = Arrays.copyOf(initPoints, initPoints.length);
-        Arrays.sort(points);
-        //array points sorted by point's position
-
+        Arrays.sort(points); //array points sorted by point's position
         Point[] sortedBySlope;
         for (int i = 0; i < points.length; i++) {
             Point first = points[i];
             if (first == null)
                 throw new NullPointerException();
             sortedBySlope = Arrays.copyOfRange(points, i + 1, points.length);
-            Arrays.sort(sortedBySlope, first.slopeOrder());
+            Arrays.sort(sortedBySlope, first.slopeOrder()); //array points sorted by slope to first point
             Map<Double, Integer> slopeStats = new HashMap<>();
             ArrayList<Double> slopes = new ArrayList<>();
             for (Point aSortedBySlope : sortedBySlope) slopes.add(first.slopeTo(aSortedBySlope));
@@ -65,8 +63,6 @@ public class FastCollinearPoints {
      * as long as our array is sorted, no longer segment are possible
      * through the search, only shorter parts of already included segments;
      */
-
-
     private static boolean checkIsIncluded(ArrayList<ArrayList<Point>> segmentList, ArrayList<Point> newSegment) {
         boolean isAlreadyAdded = false;
         if (segmentList.size() > 0) {
@@ -84,25 +80,9 @@ public class FastCollinearPoints {
         return isAlreadyAdded;
     }
 
-    /*private static boolean checkIsIncluded(ArrayList<ArrayList<Point>> segmentList, ArrayList<Point> newSegment) {
-        boolean included = false;
-        if (segmentList.size() > 0) {
-            for (ArrayList<Point> segment : segmentList) {
-                if (segment.get(segment.size() - 1) == newSegment.get(newSegment.size() - 1)
-                        && segment.get(segment.size() - 1).slopeTo(segment.get(0))
-                        == newSegment.get(newSegment.size() - 1).slopeTo(newSegment.get(0))) {
-                    included = true;
-                    break;
-                }
-            }
-        }
-        return included;
-    }*/
-
     /**
      * Returns the number of line segments
      */
-
     public int numberOfSegments() {
         return toReturn.length;
     }
