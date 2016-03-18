@@ -5,3 +5,4 @@ Hope I will find better solution soon, until that time, let it just be here.
 
 # Algs-Points
 A couple of assignments from Coursera Algorithms Part I course.
+http://coursera.cs.princeton.edu/algs4/assignments/collinear.html
